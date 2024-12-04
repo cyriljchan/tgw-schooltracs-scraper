@@ -116,6 +116,7 @@ class SchoolTracsFuncs:
                 for remark in student['prev_remarks']:
                     print(remark)
             print()
+        print(f"{ len(self.students) } students in { self.headers["branch"] } ({ self.headers["date"] })")
         input("Press [ENTER] to go back.")
 
 
