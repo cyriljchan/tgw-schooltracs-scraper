@@ -5,6 +5,7 @@ from datetime import datetime
 import getpass
 import os, sys
 import re
+import time
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -105,8 +106,52 @@ class SchoolTracsFuncs:
                     students.append(student)
         return students        
 
-    def get_studentremarks(self):
-        pass
+    def get_studentremarks(self):# Get each student's activity information
+        os.system("cls")
+        print("Getting student remarks...")
+        for student in self.students:
+            print(f"Getting student remarks ({ self.students.index(student) + 1 }/{ len(self.students) })")
+
+            # Skip non-regular students
+            if student['act-name'] not in "ENGBCROBMC STEMGMRobloxScratchSSL":
+                continue
+
+            # Open student details
+            act_box = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, f"//span[contains(text(), '{ student['name'] }')]/ancestor::div[@class='act-box']")))
+            driver.execute_script("arguments[0].click();", act_box)
+            WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, f"//a[contains(text(), '{ student['name'] }')]"))).click()
+            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, f"//label[contains(text(), '{ student['name'] }')]")))
+            WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, f"//button[contains(text(), 'Detail')]"))).click()
+
+            # Open student activities (the popup window)
+            enrollmentrecords = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, f"//span[contains(text(), 'Enrollment Records')]")))
+            driver.execute_script("arguments[0].click();", enrollmentrecords)
+            time.sleep(2)
+
+            # Extract last known activity
+            date_list = driver.find_elements(By.XPATH, f"""//div[contains(@class, 'x-grid3-col-date') and contains(text(), '{ self.headers['date'] }')]
+                                                                                                        //ancestor::div[contains(@class, 'x-grid3-row')]
+                                                                                                        //following-sibling::div""")
+            for date_row in date_list:
+                name = date_row.find_element(By.XPATH, ".//div[contains(@class, 'x-grid3-col-name')]").text
+                date = date_row.find_element(By.XPATH, ".//div[contains(@class, 'x-grid3-col-date')]").text
+                remark = date_row.find_element(By.XPATH, ".//div[contains(@class, 'x-grid3-col-remark')]").text
+                attendance = date_row.find_element(By.XPATH, ".//div[contains(@class, 'x-grid3-col-attendance')]").text
+                
+                if name != student['act-name']:
+                    continue
+
+                if date == self.headers["date"]:
+                    continue
+                
+                if attendance == "Present":
+                    student['prev_remarks'].append((date, remark))
+                    break
+                student['prev_remarks'].append((date, remark))
+        
+            # Close popup        
+            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "//div[@class=' x-window x-resizable-pinned']//descendant::div[@class='x-tool x-tool-close']"))).click()
+            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(), 'Timetable')]"))).click()
 
     def print_students(self):
         for student in self.students:
@@ -154,8 +199,11 @@ class SchoolTracsMain(SchoolTracsFuncs):
             self.timetable_menu()
 
         elif choice == "2":
-            # TODO: extract timetable information and student remarks
-            pass
+            if not self.students:
+                self.students = self.get_students()
+            self.get_studentremarks()
+            self.print_students()
+            self.timetable_menu()
 
         elif choice == "3":
             self.change_branch()
