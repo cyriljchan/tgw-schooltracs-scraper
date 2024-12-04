@@ -13,14 +13,6 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-
-options = Options()
-options.add_argument("--headless")
-url = "https://my.schooltracs.com/app/login"
-driver = webdriver.Firefox(options=options)
-driver.get(url)
-
-
 class SchoolTracsFuncs:
     def check_element_exists(self, driver, by, xpath):
         try:
@@ -240,6 +232,13 @@ class SchoolTracsMain(SchoolTracsFuncs):
         else:
             os.system("cls")
             self.main_menu()
+
+
+options = Options()
+options.add_argument("--headless")
+url = "https://my.schooltracs.com/app/login"
+driver = webdriver.Firefox(options=options)
+driver.get(url)
 
 st_scrape = SchoolTracsMain()
 st_scrape.main_menu()
