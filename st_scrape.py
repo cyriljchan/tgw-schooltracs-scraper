@@ -5,6 +5,9 @@ import getpass
 import os, sys
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 options = Options()
@@ -16,8 +19,28 @@ driver.get(url)
 
 class SchoolTracsFuncs:
     def login(self) -> None:
-        # TODO: login funcationality
-        pass
+        print("Please enter login credentials.")
+
+        login_msg = WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "st-login-msg")))
+        username = WebDriverWait(driver,10).until(EC.visibility_of_any_elements_located((By.ID, "username")))
+        password = WebDriverWait(driver,10).until(EC.visibility_of_any_elements_located((By.ID, "password")))
+        login_button = WebDriverWait(driver,10).until(EC.visibility_of_any_elements_located((By.ID, "login-btn")))
+        
+        driver.execute_script("arguments[0].innerHTML = '';", login_msg[0])
+        driver.execute_script("arguments[0].innerHTML = '';", login_msg[-1])
+        username[-1].clear()
+        password[-1].clear()
+        username[-1].send_keys(input("Login ID: "))
+        password[-1].send_keys(getpass.getpass())
+        driver.execute_script("arguments[0].click();", login_button[-1])
+
+        try:
+            WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "//div[contains(text(), 'Invalid')]")))
+            return False
+        except:
+            print("Logging in...")
+            return True
+
 
 
 class SchoolTracsMain(SchoolTracsFuncs):
