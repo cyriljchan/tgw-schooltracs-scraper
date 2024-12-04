@@ -60,7 +60,17 @@ class SchoolTracsFuncs:
 
 
     def change_date(self):
-        pass
+        os.system("cls")
+        print("Change Date")
+        date = input("Input date (YYYY-MM-DD) then press [ENTER] ")
+        date_input = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//input[@name='dateInput']")))
+        date_input.clear()
+        date_input.send_keys(date)
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@class=' x-btn-text st-tb-left']"))).click()
+        WebDriverWait(driver, 10).until(EC.invisibility_of_element((By.XPATH, "//div[@class='ext-el-mask']")))
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@class=' x-btn-text st-tb-right']"))).click()
+        date = driver.find_element(By.XPATH, "//input[@name='dateInput']").get_attribute("value")
+        self.timetable["date"] = datetime.strptime(date, '%d/%m/%Y').strftime('%Y-%m-%d')
 
 
 class SchoolTracsMain(SchoolTracsFuncs):
