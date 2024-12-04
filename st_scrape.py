@@ -51,7 +51,7 @@ class SchoolTracsFuncs:
         choice = input("Choose an option [1,2,3] then press [ENTER] ")
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']"))).click()
         WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, f"//div[contains(text(), '{ branches[choice] }')]"))).click()
-        self.timetable["branch"] = driver.find_element(By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']").get_attribute("value")
+        self.headers["branch"] = driver.find_element(By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']").get_attribute("value")
         
         body = driver.find_element(By.TAG_NAME, "body")
         while "x-body-masked" in body.get_attribute("class"):
@@ -68,27 +68,27 @@ class SchoolTracsFuncs:
         WebDriverWait(driver, 10).until(EC.invisibility_of_element((By.XPATH, "//div[@class='ext-el-mask']")))
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@class=' x-btn-text st-tb-right']"))).click()
         date = driver.find_element(By.XPATH, "//input[@name='dateInput']").get_attribute("value")
-        self.timetable["date"] = datetime.strptime(date, '%d/%m/%Y').strftime('%Y-%m-%d')
+        self.headers["date"] = datetime.strptime(date, '%d/%m/%Y').strftime('%Y-%m-%d')
 
 
 class SchoolTracsMain(SchoolTracsFuncs):
     def __init__(self) -> None:
-        self.timetable = {"branch":"", "date":""}
+        self.headers = {"branch":"", "date":""}
 
     def timetable_menu(self):
         os.system("cls")
         timetable_btn = driver.find_element(By.XPATH, "//*[contains(text(), 'Timetable')]")
         driver.execute_script("arguments[0].click()", timetable_btn)
-        self.timetable["branch"] = driver.find_elements(By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']")[0].get_attribute("value")
+        self.headers["branch"] = driver.find_elements(By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']")[0].get_attribute("value")
         date = driver.find_element(By.XPATH, "//input[@name='dateInput']").get_attribute("value")
-        self.timetable["date"] = datetime.strptime(date, '%d/%m/%Y').strftime('%Y-%m-%d')
+        self.headers["date"] = datetime.strptime(date, '%d/%m/%Y').strftime('%Y-%m-%d')
         instructor = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "//span[@title='Instructor']"))).text
 
         print(f"""Hello, { instructor } \n""")
-        print(f"Branch: { self.timetable['branch'] }")
-        print(f"Date: { self.timetable['date'] }")
-        print(f"[1] View Schedule ({ self.timetable['date'] })")
-        print(f"[2] View Schedule with Remarks/Activities ({ self.timetable['date'] })")
+        print(f"Branch: { self.headers['branch'] }")
+        print(f"Date: { self.headers['date'] }")
+        print(f"[1] View Schedule ({ self.headers['date'] })")
+        print(f"[2] View Schedule with Remarks/Activities ({ self.headers['date'] })")
         print(f"[3] Change Branch")
         print(f"[4] Change Date")
         print(f"[0] Logout")
