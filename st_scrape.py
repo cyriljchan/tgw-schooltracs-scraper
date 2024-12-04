@@ -95,8 +95,9 @@ class SchoolTracsMain(SchoolTracsFuncs):
         choice = input("Choose an option [1,2,3,4,0] then press [ENTER] ")
 
         if choice == "0":
-            # TODO: logout function
-            pass
+            driver.find_element(By.XPATH, "//button[@class=' x-btn-text st-icon-logout']").click()
+            self.main_menu("Logged out.")
+
         elif choice == "1":
             # TODO: extract timetable information
             pass
