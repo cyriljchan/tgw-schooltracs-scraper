@@ -58,9 +58,12 @@ class SchoolTracsFuncs:
         for key, branch in branches.items():
             print(f"[{ key }] { branch }")
         choice = input("Choose an option [1,2,3] then press [ENTER] ")
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']"))).click()
-        WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, f"//div[contains(text(), '{ branches[choice] }')]"))).click()
-        self.headers["branch"] = driver.find_element(By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']").get_attribute("value")
+        if choice in branches.keys():
+            WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']"))).click()
+            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, f"//div[contains(text(), '{ branches[choice] }')]"))).click()
+            self.headers["branch"] = driver.find_element(By.XPATH, "//input[@class='x-form-text x-form-field x-trigger-noedit']").get_attribute("value")
+        else:
+            self.change_branch()
         
         body = driver.find_element(By.TAG_NAME, "body")
         while "x-body-masked" in body.get_attribute("class"):
