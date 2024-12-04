@@ -4,11 +4,13 @@
 from datetime import datetime
 import getpass
 import os, sys
+import re
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 options = Options()
@@ -19,6 +21,13 @@ driver.get(url)
 
 
 class SchoolTracsFuncs:
+    def check_element_exists(self, driver, by, xpath):
+        try:
+            driver.find_element(by, xpath)
+        except NoSuchElementException:
+            return False
+        return True
+
     def login(self) -> None:
         print("Please enter login credentials.")
         login_msg = WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "st-login-msg")))
@@ -70,10 +79,47 @@ class SchoolTracsFuncs:
         date = driver.find_element(By.XPATH, "//input[@name='dateInput']").get_attribute("value")
         self.headers["date"] = datetime.strptime(date, '%d/%m/%Y').strftime('%Y-%m-%d')
 
+    def get_students(self):
+        os.system("cls")
+        print("Getting students...")
+
+        # Get all activities that have students scheduled
+        results = WebDriverWait(driver, 5).until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='act-box']")))
+        activities = [result for result in results if "0/0" not in result.get_attribute("textContent")]
+
+        # Create dict using student details (activity name, name, timeslot, instructor, remarks)
+        students = []
+        for activity in activities:
+            for details in activity.find_element(By.XPATH, ".//div[@class='customers']").find_elements(By.XPATH, ".//div"):
+                if "line-through" not in details.find_element(By.XPATH, ".//span[@class='name']").get_attribute("style"):
+                    student = {
+                        "act-name": activity.find_element(By.XPATH, ".//div[@class='act-name']").text,
+                        "name": (re.sub("\\(.*?\\)", "", details.find_element(By.XPATH, ".//span[@class='name']").text)).strip(),
+                        "time": activity.find_element(By.XPATH, ".//div[@class='time']").text,
+                        "teacher": activity.find_element(By.XPATH, ".//div[@class='resource'][@style='']").text if self.check_element_exists(activity, By.CLASS_NAME, "resource") else "",
+                        "prev_remarks": []
+                    }
+                    students.append(student)
+        return students        
+
+    def get_studentremarks(self):
+        pass
+
+    def print_students(self):
+        for student in self.students:
+            print(f"{ student['act-name'] } ({ student['time']}) [{ student['teacher'] }]")
+            print(student['name'])
+            if student['prev_remarks']:
+                for remark in student['prev_remarks']:
+                    print(remark)
+            print()
+        input("Press [ENTER] to go back.")
+
 
 class SchoolTracsMain(SchoolTracsFuncs):
     def __init__(self) -> None:
         self.headers = {"branch":"", "date":""}
+        self.students = []
 
     def timetable_menu(self):
         os.system("cls")
@@ -99,14 +145,18 @@ class SchoolTracsMain(SchoolTracsFuncs):
             self.main_menu("Logged out.")
 
         elif choice == "1":
-            # TODO: extract timetable information
-            pass
+            self.students = self.get_students()
+            self.print_students()
+            self.timetable_menu()
+
         elif choice == "2":
             # TODO: extract timetable information and student remarks
             pass
+
         elif choice == "3":
             self.change_branch()
             self.timetable_menu()
+
         elif choice == "4":
             self.change_date()
             self.timetable_menu()
