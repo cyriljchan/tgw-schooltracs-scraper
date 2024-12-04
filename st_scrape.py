@@ -21,7 +21,6 @@ driver.get(url)
 class SchoolTracsFuncs:
     def login(self) -> None:
         print("Please enter login credentials.")
-
         login_msg = WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "st-login-msg")))
         username = WebDriverWait(driver,10).until(EC.visibility_of_any_elements_located((By.ID, "username")))
         password = WebDriverWait(driver,10).until(EC.visibility_of_any_elements_located((By.ID, "password")))
@@ -57,7 +56,6 @@ class SchoolTracsFuncs:
         body = driver.find_element(By.TAG_NAME, "body")
         while "x-body-masked" in body.get_attribute("class"):
             pass
-
 
     def change_date(self):
         os.system("cls")
